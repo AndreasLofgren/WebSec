@@ -1,8 +1,8 @@
 <?php
 $dbhost = 'localhost';
 $username = 'root';
-$password = 'free15215';
-$database = 'websecexam';
+$password = 'the password here';
+$database = 'WebSecExam';
 //create the connection
 $conn = mysqli_connect($dbhost, $username, $password, $database);
 
