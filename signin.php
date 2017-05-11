@@ -51,17 +51,9 @@ if (isset($_SESSION['signed_in']) && $_SESSION['signed_in'] == true) {
         } else {
             //the form has been posted without errors, so save it
             //mysql_real_escape_string, keep everything safe!
-            $sql = "SELECT 
-                        user_id,
-                        user_name,
-                        user_level,
-                        user_pass
-                    FROM
-                        users
-                    WHERE
-                        user_name = '" . mysqli_real_escape_string($conn, $_POST['user_name']) . "'";
-            
-            $result = mysqli_query($conn, $sql);
+            $sql = $conn->exec('call getUserName('.val($_POST['user_name']).')');
+            $result = $conn->query('select '.$_GET['name'])->fetchAll();
+
             if (mysqli_num_rows($result) == 0) {
                 //something went wrong, display the error
                 echo '<p id="msg">The user does\'n exist. Please<a href="signup.php"> sign-up<a>!</p>';

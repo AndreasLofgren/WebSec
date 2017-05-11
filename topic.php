@@ -6,17 +6,8 @@ include 'connect.php';
 include 'header.php';
 //include 'write_to_console.php';
 
-
-$sql = "SELECT
-    topic_id,
-    topic_subject,
-    topic_date
-FROM
-    topics
-WHERE
-    topics.topic_id =" . mysqli_real_escape_string($conn, $_GET['id']);
-
-$result = mysqli_query($conn, $sql);
+$sql = $conn->exec('call getTopic('.$_GET['id'].')');
+$result = $conn->query('select '.$_GET['id'])->fetchAll();
 
 if (!$result) {
     echo '<p id="msg">The topic could not be displayed, please try again later.</p>>';

@@ -76,15 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
         echo '</ul>';
     } else {
         //save the user details in the db
-        $sql = "INSERT INTO
-                    users(user_name, user_pass, user_email ,user_date, user_level)
-                VALUES('" . mysqli_real_escape_string($conn, $_POST['user_name']) . "',
-                       '" . hash_bcrypt($_POST['user_pass']) . "',
-                       '" . mysqli_real_escape_string($conn, $_POST['user_email']) . "',
-                        NOW(),
-                        0)";
-        
-        $result = mysqli_query($conn, $sql);
+        $sql = $conn->exec('call insertUser('.val($_POST['user_name']).', '.hash_bcrypt($_POST['user_pass']).', '.val( $_POST['user_email']).', '.NOW().', 0)');
+        $result = $conn->query('select '.$_GET['name'])->fetchAll();
+
         if (!$result) {
             //something went wrong, display the error
             echo 'Something went wrong while registering. Please try again later. Possible reasons: user or email already exist.';

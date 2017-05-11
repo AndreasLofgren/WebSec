@@ -33,12 +33,11 @@ if( $_SESSION['user_level'] != 1 )
     
 } else {
 //    the form has been posted, saving the category in the db
-    $val1 = mysqli_real_escape_string($conn, $_POST['cat_name']);
-    $val2 = mysqli_real_escape_string($conn, $_POST['cat_description']);
-    
-    $sql = "INSERT INTO categories (cat_name, cat_description)";
-    $sql .= "VALUES('$val1','$val2')";
-    $result = mysqli_query($conn, $sql);
+    $val1 = mysqli_real_escape_string($conn, val($_POST['cat_name']));
+    $val2 = mysqli_real_escape_string($conn, val($_POST['cat_description']));
+
+    $sql = $conn->exec('call insertCategory('.$val1.', '.$val2.')');
+    $result = $conn->query('select '.$_GET['id'])->fetchAll();
     if (!$result) {
         //something went wrong, display the error
         echo 'Error' . mysqli_error($conn);

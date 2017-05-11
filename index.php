@@ -17,8 +17,8 @@ echo '<h2 id="title">Forum overview</h2>';
 if (!$_SESSION['signed_in']) {
     echo '<p id="msg">You must be <a href="signin.php">signed in</a> to view the forum\'s content!</p>';
 } else {
-    $sql = "SELECT * FROM categories";
-    $result = mysqli_query($conn, $sql);
+    $sql = $conn->exec('call getCategories()');
+    $result = $conn->query('select *')->fetchAll();
 
 //write_to_console($result);
     if (!$result) {

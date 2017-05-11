@@ -4,16 +4,9 @@ include 'connect.php';
 include 'header.php';
 
 //first select the category based on $_GET['id'] passed from the index.php page
-$sql = "SELECT
-            cat_id,
-            cat_name,
-            cat_description
-        FROM
-            categories
-        WHERE
-            cat_id = " . mysqli_real_escape_string($conn, $_GET['id']);
 
-$result = mysqli_query($conn, $sql);
+$sql = $conn->exec('call getCategory('.$_GET['id'].')');
+$result = $conn->query('select '.$_GET['id'])->fetchAll();
 
 if(!$result)
 {
@@ -34,17 +27,10 @@ else
         }
         
         //do a query for the topics
-        $sql = "SELECT
-                    topic_id,
-                    topic_subject,
-                    topic_date,
-                    topic_cat
-                FROM
-                    topics
-                WHERE
-                    topic_cat = " . mysqli_real_escape_string($conn, $_GET['id']);
+        $sql = $conn->exec('call getTopicCat('.$_GET['id'].')');
+
         
-        $result = mysqli_query($conn, $sql);
+        $result = $conn->query('select '.$_GET['id'])->fetchAll();
         
         if(!$result)
         {

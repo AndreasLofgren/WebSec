@@ -18,17 +18,8 @@ else
     else
     {
         //a real user posted a real reply
-        $sql = "INSERT INTO
-                    posts(post_content,
-                          post_date,
-                          post_topic,
-                          post_by)
-                VALUES ('" . $_POST['reply-content'] . "',
-                        NOW(),
-                        " . mysqli_real_escape_string($conn, $_GET['id']) . ",
-                        " . $_SESSION['user_id'] . ")";
-        
-        $result = mysqli_query($conn, $sql);
+        $sql = $conn->exec('call insertPost('.val($_POST['reply_content']).', '.NOW().', '.$_GET['id'].', '.$_SESSION['user_id'].')');
+        $result = $conn->query('select '.$_GET['id'])->fetchAll();
         
         if(!$result)
         {
