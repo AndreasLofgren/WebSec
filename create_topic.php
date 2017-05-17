@@ -18,8 +18,9 @@ else
     {
         //the form hasn't been posted yet, display it
         //retrieve the categories from the database for use in the dropdown
-        $sql = $conn->exec('call getCategories()');
-        $result = $conn->query('select *')->fetchAll();
+        $sql = $conn->prepare('call getCategories()');
+        $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+        $sql->execute();
         
         if(!$result)
         {
@@ -28,7 +29,7 @@ else
         }
         else
         {
-            if(mysqli_num_rows($result) == 0)
+            if($sql->rowCount($result) == 0)
             {
                 //there are no categories, so a topic can't be posted
                 if($_SESSION['user_level'] == 1)
@@ -49,7 +50,7 @@ else
                                placeholder="Type a subject!"></div>';
                 echo '<div class="form-group"><label id="label-cat">Category: </label>';
                 echo '<select class="form-control" name="topic_cat">';
-                while($row = mysqli_fetch_assoc($result))
+                while($row = $sql->fetch(PDO::FETCH_ASSOC))
                 {
                     echo '<option value="' . $row['cat_id'] . '">' . $row['cat_name'] . '</option>';
                 }
@@ -64,9 +65,8 @@ else
     }
     else
     {
-        //start the transaction
-        $query  = "BEGIN WORK;";
-        $result = mysqli_query($conn, $query);
+
+        $result = $conn->beginTransaction();
         
         if(!$result)
         {
@@ -79,35 +79,44 @@ else
             //the form has been posted, so save it
             //insert the topic into the topics table first, then we'll save the post into the posts table
 
-            $sql = $conn->exec('call insertTopic('.val($_POST['topic_subject']).', '.NOW().', '.val($_POST['topic_cat']).', '.$_SESSION['user_id'].')');
-            $result = $conn->query('select '.$_GET['id'])->fetchAll();
+            $sql = $conn->prepare('call insertTopic(?, NOW(), ?, ?)');
+            $sql->bindValue(1, val($_POST['topic_subject']));
+            $sql->bindValue(3, val($_POST['topic_cat']));
+            $sql->bindValue(4, $_SESSION['user_id']);
+            $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+            $sql->execute();
+
             if(!$result)
             {
                 //something went wrong, display the error
-                echo 'An error occured while inserting your data. Please try again later.' . mysqli_error($conn);
+                echo 'An error occured while inserting your data. Please try again later.' . $conn->errorInfo();
                 $sql = "ROLLBACK;";
-                $result = mysqli_query($conn, $sql);
+                $result = $conn->query($sql);
             }
             else
             {
                 //the first query worked, now start the second, posts query
                 //retrieve the id of the freshly created topic for usage in the posts query
-                $topicid = mysqli_insert_id($conn);
+                $topicid = $conn->lastIinsertId();
 
-                $sql = $conn->exec('call insertPost('.val($_POST['post_content']).', '.NOW().', '.$topicid.', '.$_SESSION['user_id'].')');
-                $result = $conn->query('select '.$_GET['id'])->fetchAll();
+                $sql = $conn->prepare('call insertPost(?, NOW(), ?, ?)');
+                $sql->bindValue(1, val($_POST['post_content']));
+                $sql->bindValue(3, $topicid);
+                $sql->bindValue(4, $_SESSION['user_id']);
+                $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+                $sql->execute();
                 
                 if(!$result)
                 {
                     //something went wrong, display the error
-                    echo 'An error occured while inserting your post. Please try again later.' . mysqli_error();
+                    echo 'An error occured while inserting your post. Please try again later.' . $conn->errorInfo();
                     $sql = "ROLLBACK;";
-                    $result = mysqli_query($conn, $sql);
+                    $result = $conn->query($sql);
                 }
                 else
                 {
                     $sql = "COMMIT;";
-                    $result = mysqli_query($conn, $sql);
+                    $result = $conn->query($sql);
                     
                     //after a lot of work, the query succeeded!
                     echo '<p id="msg">You have successfully created <a href="topic.php?id='. $topicid . '">your new topic</a>.</p>';

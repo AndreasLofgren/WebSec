@@ -17,15 +17,17 @@ echo '<h2 id="title">Forum overview</h2>';
 if (!$_SESSION['signed_in']) {
     echo '<p id="msg">You must be <a href="signin.php">signed in</a> to view the forum\'s content!</p>';
 } else {
-    $sql = $conn->exec('call getCategories()');
-    $result = $conn->query('select *')->fetchAll();
+    $sql = $conn->prepare('call getCategories()');
+    $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+    $sql->execute();
+
 
 //write_to_console($result);
     if (!$result) {
         echo '<p id="msg">The categories could not be displayed, please try again later.</p></br>';
 //        die("The query failed!" . mysqli_error($conn));
     } else {
-        if (mysqli_num_rows($result) == 0) {
+        if ($sql->rowCount($result) == 0) {
             echo 'No categories defined yet.';
         } else {
             //table header
@@ -37,7 +39,7 @@ if (!$_SESSION['signed_in']) {
             echo '</table>';
             $prev_topic_date = "";
             //using an associative array with keys = column names
-            while ($row = mysqli_fetch_assoc($result)) {
+            while ($row = $sql->fetch(PDO::FETCH_ASSOC)) {
                 //table rows
                 echo '<table border="1">';
                 echo '<tr id="table_rows">';
@@ -53,7 +55,7 @@ if (!$_SESSION['signed_in']) {
             }
             
             //release the resource
-            mysqli_free_result($result);
+            unset($result);
         }
     }
 }
@@ -61,5 +63,5 @@ include 'footer.php';
 
 
 // 5. Close database connection
-mysqli_close($conn);
+$conn = null;
 

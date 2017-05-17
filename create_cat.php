@@ -4,7 +4,9 @@
 error_reporting(E_ALL & ~E_NOTICE);
 include 'connect.php';
 include 'header.php';
+include 'validation.php';
 //include 'write_to_console.php';
+
 echo '<h2 id="title">Create a category</h2>';
 if( $_SESSION['user_level'] != 1 )
 {
@@ -33,18 +35,19 @@ if( $_SESSION['user_level'] != 1 )
     
 } else {
 //    the form has been posted, saving the category in the db
-    $val1 = mysqli_real_escape_string($conn, val($_POST['cat_name']));
-    $val2 = mysqli_real_escape_string($conn, val($_POST['cat_description']));
 
-    $sql = $conn->exec('call insertCategory('.$val1.', '.$val2.')');
-    $result = $conn->query('select '.$_GET['id'])->fetchAll();
+
+    $sql = $conn->prepare('call insertCategory(?, ?)');
+    $sql->bindValue(1, val($_POST['cat_name']));
+    $sql->bindValue(2, val($_POST['cat_description']));
+    $result = $conn->execute();
     if (!$result) {
         //something went wrong, display the error
-        echo 'Error' . mysqli_error($conn);
+        echo 'Error' . $conn->errorInfo();
     } else {
         echo '<p id="msg">New category successfully added.</p>';
     };
 }
 
-mysqli_close($conn);
+$conn = null;
 include 'footer.php'; ?>

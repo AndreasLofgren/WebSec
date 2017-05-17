@@ -5,6 +5,7 @@ session_start();
 include 'connect.php';
 include 'header.php';
 include 'enc.php';
+include 'validation.php';
 
 echo '<h2 id="title">Sign in</h2>';
 
@@ -51,10 +52,12 @@ if (isset($_SESSION['signed_in']) && $_SESSION['signed_in'] == true) {
         } else {
             //the form has been posted without errors, so save it
             //mysql_real_escape_string, keep everything safe!
-            $sql = $conn->exec('call getUserName('.val($_POST['user_name']).')');
-            $result = $conn->query('select '.$_GET['name'])->fetchAll();
+            $sql = $conn->prepare('call getUserName(?)');
+            $sql->bindValue(1, val($_POST['user_name']));
+            $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+            $sql->execute();
 
-            if (mysqli_num_rows($result) == 0) {
+            if ($sql->rowCount($result) == 0) {
                 //something went wrong, display the error
                 echo '<p id="msg">The user does\'n exist. Please<a href="signup.php"> sign-up<a>!</p>';
                 //echo mysqli_error($conn); //debugging purposes, uncomment when needed
@@ -62,7 +65,7 @@ if (isset($_SESSION['signed_in']) && $_SESSION['signed_in'] == true) {
                 //the query was successfully executed, there are 2 possibilities
                 //1. the query returned data, the user can be signed in
                 //2. the query returned an empty result set, the credentials were wrong
-                while ($row = mysqli_fetch_assoc($result)) {
+                while ($row = $sql->fetch(PDO::FETCH_ASSOC)) {
                     if ( !password_verify( $_POST['user_pass'], $row['user_pass'] ) ) {
                         echo '<p id="msg">You have supplied a wrong username or password. Please try again.</p>';
                     } else {
@@ -75,7 +78,7 @@ if (isset($_SESSION['signed_in']) && $_SESSION['signed_in'] == true) {
                         
                     }
                 }
-                mysqli_free_result($result);
+                unset($result);
             }
         }
     }

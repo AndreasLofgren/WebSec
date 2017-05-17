@@ -5,32 +5,32 @@ include 'header.php';
 
 //first select the category based on $_GET['id'] passed from the index.php page
 
-$sql = $conn->exec('call getCategory('.$_GET['id'].')');
-$result = $conn->query('select '.$_GET['id'])->fetchAll();
+$sql = $conn->prepare('call getCategory('.$_GET['id'].')');
+$sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+$sql->execute();
 
 if(!$result)
 {
-    echo 'The category could not be displayed, please try again later.' . mysqli_error($conn);
+    echo 'The category could not be displayed, please try again later.' . $conn->errorInfo();
 }
 else
 {
-    if(mysqli_num_rows($result) == 0)
+    if($sql->rowCount($result) == 0)
     {
         echo '<p id="msg">This category does not exist.</p>';
     }
     else
     {
         //display category data
-        while($row = mysqli_fetch_assoc( $result))
+        while ($row = $sql->fetch(PDO::FETCH_ASSOC))
         {
             echo '<h2 id="title">Topics in "' . $row['cat_name'] . '" category</h2>';
         }
         
         //do a query for the topics
-        $sql = $conn->exec('call getTopicCat('.$_GET['id'].')');
-
-        
-        $result = $conn->query('select '.$_GET['id'])->fetchAll();
+        $sql = $conn->prepare('call getTopicCat('.$_GET['id'].')');
+        $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+        $sql->execute();
         
         if(!$result)
         {
@@ -38,7 +38,7 @@ else
         }
         else
         {
-            if(mysqli_num_rows($result) == 0)
+            if($sql->rowCount($result) == 0)
             {
                 echo '<p id="msg">There are no topics in this category yet.</p>';
             }
@@ -51,8 +51,7 @@ else
                         <th class="rightpart">Created on</th>
                       </tr>
                       </table>';
-                
-                while($row = mysqli_fetch_assoc($result))
+                while ($row = $sql->fetch(PDO::FETCH_ASSOC))
                 {
                     echo '<table border="1">';
                     echo '<tr id="table_rows">';

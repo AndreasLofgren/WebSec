@@ -6,14 +6,16 @@ include 'connect.php';
 include 'header.php';
 //include 'write_to_console.php';
 
-$sql = $conn->exec('call getTopic('.$_GET['id'].')');
-$result = $conn->query('select '.$_GET['id'])->fetchAll();
+$sql = $conn->prepare('call getTopic(?)');
+$sql->bindValue(1, $_GET['id']);
+$sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+$sql->execute();
 
 if (!$result) {
     echo '<p id="msg">The topic could not be displayed, please try again later.</p>>';
 //    die("The query failed!");
 } else {
-    if (mysqli_num_rows($result) == 0) {
+    if ($sql->rowCount($result) == 0) {
         echo 'No replies for this topic yet.';
     } else {
         //table header
@@ -23,7 +25,7 @@ if (!$result) {
         echo '</tr>';
         echo '</table>';
         //using an associative array with keys = column names
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $sql->fetch(PDO::FETCH_ASSOC)) {
             //table rows
             echo '<table border="1">';
             echo '<tr id="table_rows">';
@@ -39,12 +41,12 @@ if (!$result) {
         }
         
         //release the resource
-        mysqli_free_result($result);
+        unset($result);
     }
 }
 include 'footer.php';
 
 
 // 5. Close database connection
-mysqli_close($conn);
+$conn = null;
 

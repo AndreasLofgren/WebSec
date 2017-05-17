@@ -4,6 +4,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 include 'connect.php';
 include 'header.php';
 include 'enc.php';
+include 'validation.php';
 
 
 echo '<h2 id="sign-up-title">Sign up</h2>';
@@ -76,8 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
         echo '</ul>';
     } else {
         //save the user details in the db
-        $sql = $conn->exec('call insertUser('.val($_POST['user_name']).', '.hash_bcrypt($_POST['user_pass']).', '.val( $_POST['user_email']).', '.NOW().', 0)');
-        $result = $conn->query('select '.$_GET['name'])->fetchAll();
+        $sql = $conn->prepare('call insertUser(?, ?, ?, NOW(), 0)');
+        $sql->bindValue(1, val($_POST['user_name']));
+        $sql->bindValue(2, hash_bcrypt($_POST['user_pass']));
+        $sql->bindValue(3, val( $_POST['user_email']));
+        $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+
+        $sql->execute();
 
         if (!$result) {
             //something went wrong, display the error

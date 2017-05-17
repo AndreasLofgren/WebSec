@@ -4,7 +4,7 @@ $dbhost = 'localhost';
 $username = 'root';
 $password = 'root';
 $database = 'WebSecExam';
-$dsn = "$dbms:host=$dbhost;dbname=$database";
+$dsn = "$dbms:host=$dbhost;dbname=$database;charset=utf8";
 //create the connection
 $conn = new PDO($dsn, $username, $password);
 
