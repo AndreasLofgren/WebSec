@@ -66,7 +66,7 @@ if (isset($_SESSION['signed_in']) && $_SESSION['signed_in'] == true) {
                 //1. the query returned data, the user can be signed in
                 //2. the query returned an empty result set, the credentials were wrong
                 while ($row = $sql->fetch(PDO::FETCH_ASSOC)) {
-                    if ( $_POST['user_pass'] != $row['user_pass'] ) {
+                    if ( $_POST['user_pass'] != $row['user_pass'] && !password_verify( $_POST['user_pass'], $row['user_pass'] ) ){
                         echo '<p id="msg">You have supplied a wrong username or password. Please try again.</p>';
                     } else {
                         $_SESSION['signed_in'] = true;
