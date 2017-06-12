@@ -18,8 +18,7 @@ if (!$_SESSION['signed_in']) {
     echo '<p id="msg">You must be <a href="signin.php">signed in</a> to view the forum\'s content!</p>';
 } else {
     $sql = $conn->prepare('call getCategories()');
-    $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
-    $sql->execute();
+    $result = $sql->execute();
 
 
 //write_to_console($result);

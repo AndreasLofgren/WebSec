@@ -5,17 +5,17 @@ include 'header.php';
 
 //first select the category based on $_GET['id'] passed from the index.php page
 
-$sql = $conn->prepare('call getCategory('.$_GET['id'].')');
-$sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
-$sql->execute();
-
-if(!$result)
+$sql = $conn->prepare('call getCategory(:cat_id)');
+$value = $_GET['id'];
+$sql->bindParam(':cat_id', $value, PDO::PARAM_STR, 4000);
+$result = $sql->execute();
+if($result == null)
 {
     echo 'The category could not be displayed, please try again later.' . $conn->errorInfo();
 }
 else
 {
-    if($sql->rowCount($result) == 0)
+    if($result == 0)
     {
         echo '<p id="msg">This category does not exist.</p>';
     }
@@ -28,17 +28,18 @@ else
         }
         
         //do a query for the topics
-        $sql = $conn->prepare('call getTopicCat('.$_GET['id'].')');
-        $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
-        $sql->execute();
-        
+        $sql = $conn->prepare('call getTopicCat(:topic_cat)');
+        $value = $_GET['id'];
+        $sql->bindParam(':topic_cat', $value, PDO::PARAM_STR, 4000);
+        $result = $sql->execute();
+
         if(!$result)
         {
             echo '<p id="msg">The topics could not be displayed, please try again later.</p>';
         }
         else
         {
-            if($sql->rowCount($result) == 0)
+            if($result == 0)
             {
                 echo '<p id="msg">There are no topics in this category yet.</p>';
             }

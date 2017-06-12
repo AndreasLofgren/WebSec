@@ -6,16 +6,16 @@ include 'connect.php';
 include 'header.php';
 //include 'write_to_console.php';
 
-$sql = $conn->prepare('call getTopic(?)');
-$sql->bindValue(1, $_GET['id']);
-$sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
-$sql->execute();
+$sql = $conn->prepare('call getTopic(:topic_id)');
+$value = $_GET['id'];
+$sql->bindParam(':topic_id', $value, PDO::PARAM_STR, 4000);
+$result = $sql->execute();
 
 if (!$result) {
     echo '<p id="msg">The topic could not be displayed, please try again later.</p>>';
 //    die("The query failed!");
 } else {
-    if ($sql->rowCount($result) == 0) {
+    if ($result == 0) {
         echo 'No replies for this topic yet.';
     } else {
         //table header

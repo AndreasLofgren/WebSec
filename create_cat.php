@@ -37,10 +37,12 @@ if( $_SESSION['user_level'] != 1 )
 //    the form has been posted, saving the category in the db
 
 
-    $sql = $conn->prepare('call insertCategory(?, ?)');
-    $sql->bindValue(1, val($_POST['cat_name']));
-    $sql->bindValue(2, val($_POST['cat_description']));
-    $result = $conn->execute();
+    $sql = $conn->prepare('call insertCategory(:cat_name, :cat_description)');
+    $value1 = val($_POST['cat_name']);
+    $sql->bindParam(':cat_name', $value1, PDO::PARAM_STR, 4000);
+    $value2 = val($_POST['cat_description']);
+    $sql->bindParam(':cat_description', $value2, PDO::PARAM_STR, 4000);
+    $result = $sql->execute();
     if (!$result) {
         //something went wrong, display the error
         echo 'Error' . $conn->errorInfo();

@@ -77,13 +77,18 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
         echo '</ul>';
     } else {
         //save the user details in the db
-        $sql = $conn->prepare('call insertUser(?, ?, ?, NOW(), 0)');
-        $sql->bindValue(1, val($_POST['user_name']));
-        $sql->bindValue(2, hash_bcrypt($_POST['user_pass']));
-        $sql->bindValue(3, val( $_POST['user_email']));
-        $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
+        $sql = $conn->prepare('call insertUser(:user_name, :user_pass, :user_email, NOW(), 0)');
 
-        $sql->execute();
+        $value1 = val($_POST['user_name']);
+        $sql->bindParam(':user_name', $value1, PDO::PARAM_STR, 4000);
+
+        $value2 = hash_bcrypt($_POST['user_pass']);
+        $sql->bindParam(':user_pass', $value2, PDO::PARAM_STR, 4000);
+
+        $value3 = val( $_POST['user_email']);
+        $sql->bindParam(':user_email', $value3, PDO::PARAM_STR, 4000);
+
+        $result = $sql->execute();
 
         if (!$result) {
             //something went wrong, display the error
