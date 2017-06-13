@@ -18,12 +18,14 @@ else
     else
     {
         //a real user posted a real reply
-        $sql = $conn->prepare('call insertPost(?, NOW(), ?,?)');
-        $sql->bindValue(1, val($_POST['reply_content']));
-        $sql->bindValue(3, $_GET['id']);
-        $sql->bindValue(4, $_SESSION['user_id']);
-        $sql->bindParam(1, $result, PDO::PARAM_STR, 4000);
-        $sql->execute();
+        $sql = $conn->prepare('call insertPost(:post_content, NOW(), :post_topic, post_by)');
+        $value1 =  val($_POST['reply_content']);
+        $sql->bindParam(':post_content', $value1, PDO::PARAM_STR, 4000);
+        $value2 = $_GET['id'];
+        $sql->bindParam(':post_topic', $value2, PDO::PARAM_STR, 4000);
+        $value3 = $_SESSION['user_id'];
+        $sql->bindParam(':post_by', $value3, PDO::PARAM_STR, 4000);
+        $result = $sql->execute();
         
         if(!$result)
         {
